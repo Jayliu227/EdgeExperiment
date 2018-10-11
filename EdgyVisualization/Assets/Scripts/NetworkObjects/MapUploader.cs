@@ -44,6 +44,7 @@ public class MapUploader : EdgeClient {
 
     protected override void ProcessReponse(string commandCode, string reponse)
     {
+        Debug.Log(commandCode);
         Debug.Log(reponse);
     }
 
