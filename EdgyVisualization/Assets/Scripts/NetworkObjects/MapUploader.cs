@@ -6,45 +6,37 @@ public class MapUploader : EdgeClient {
     public GameObject grid;
     public GameObject carInstance;
     public Transform mapRoot;
-    MapData map;
+    private static MapData map;
+    private List<List<GameObject>> mapObjects;
 
     void Start ()
     {
-        //SetupConnection();
+        mapObjects = new List<List<GameObject>>();
+
+        SetupConnection();
         GenerateMap();
         DrawMap();
+
+        SendMessage(CommandList.GetCommandCode(Command.UPLOAD_MAP));
+        SendMessage(map.Stringify());
 
         // generate a car instance
         float carX = 1;
         float carY = 0;
         Vector3 pos = new Vector3(carX, carY, 0);
-        GameObject car = Instantiate(carInstance, pos, Quaternion.identity);
+        GameObject car1 = Instantiate(carInstance, pos, Quaternion.identity);
+        car1.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.cyan;
+        GameObject car2 = Instantiate(carInstance, pos, Quaternion.identity);
+        car2.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.magenta;
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            SendMessage(CommandList.GetCommandCode(Command.ECHO));
-            SendMessage("Echo from client...");
-        }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SendMessage(CommandList.GetCommandCode(Command.UPLOAD_MAP));
-            SendMessage(map.Stringify());
-        }
-
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            SendMessage(CommandList.GetCommandCode(Command.FIND_PATH));
-            SendMessage("0 3 2 0");
-        }
     }
 
     protected override void ProcessReponse(string commandCode, string reponse)
     {
-        Debug.Log(commandCode);
         Debug.Log(reponse);
     }
 
@@ -52,12 +44,13 @@ public class MapUploader : EdgeClient {
     {
         List<List<int>> mapData = new List<List<int>>();
 
-        var a = new List<int>() { 1, 0, 0, 0 };
-        var b = new List<int>() { 0, 0, 0, 1 };
-        var c = new List<int>() { 0, 1, 0, 0 };
-        var d = new List<int>() { 1, 1, 0, 0 };
-        var e = new List<int>() { 0, 0, 0, 0 };
-        var f = new List<int>() { 0, 0, 1, 1 };
+        var a = new List<int>() { 1, 0, 0, 0, 0 };
+        var b = new List<int>() { 0, 0, 0, 1, 0 };
+        var c = new List<int>() { 0, 1, 0, 0, 0 };
+        var d = new List<int>() { 0, 0, 1, 0, 1 };
+        var e = new List<int>() { 0, 1, 0, 0, 1 };
+        var f = new List<int>() { 0, 0, 0, 0, 0 };
+        var g = new List<int>() { 1, 0, 1, 0, 1 };
 
         mapData.Add(a);
         mapData.Add(b);
@@ -65,6 +58,7 @@ public class MapUploader : EdgeClient {
         mapData.Add(d);
         mapData.Add(e);
         mapData.Add(f);
+        mapData.Add(g);
 
         map = new MapData("FirstMap", 1, mapData);
     }
@@ -88,6 +82,7 @@ public class MapUploader : EdgeClient {
 
         for (int i = 0; i < width; i++)
         {
+            List<GameObject> mapRowObj = new List<GameObject>();
             for(int j = 0; j < height; j++)
             {
                 int value = map.GetValue(i, j);
@@ -103,7 +98,21 @@ public class MapUploader : EdgeClient {
                 {
                     go.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.yellow;
                 }
+
+                mapRowObj.Add(go);
             }
+            mapObjects.Add(mapRowObj);
         }
+    }
+
+    public static Vector3 GetRandomPointOnMap()
+    {
+        int width = map.GetWidth();
+        int height = map.GetHeight();
+
+        int randomX = UnityEngine.Random.Range(0, width);
+        int randomY = UnityEngine.Random.Range(0, height);
+
+        return new Vector3(randomX, randomY, 0);
     }
 }
