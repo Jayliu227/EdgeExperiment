@@ -116,6 +116,7 @@ public class EdgeWorker implements Runnable {
             }
 
             System.out.println("Found path from (" + sx + "," + sy + ") - > (" + dx + "," + dy + ")");
+            System.out.println("Message sent back: " + response);
             SendMessageBack(CommandList.Command.FIND_PATH, response);
         }
     }

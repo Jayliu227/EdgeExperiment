@@ -40,6 +40,12 @@ public class PathFinder {
         int destX = end.getKey();
         int destY = end.getValue();
 
+        visited[x][y] = true;
+
+        if (map.getMap().get(x).get(y) == 1) {
+            return Integer.MAX_VALUE;
+        }
+
         if (x == destX && y == destY) {
             return 0;
         }
@@ -47,14 +53,9 @@ public class PathFinder {
         int width = map.getWidth();
         int height = map.getHeight();
 
-        visited[x][y] = true;
-        if (map.getMap().get(x).get(y) == 1) {
-            return Integer.MAX_VALUE;
-        }
-
         int shortestDist = Integer.MAX_VALUE;
-        int nextX = 0;
-        int nextY = 0;
+        int nextX = -1;
+        int nextY = -1;
 
         if (x + 1 < width && !visited[x + 1][y]) {
             int steps = DFSPathFindHelper(new Pair<>(x + 1, y), end, visited, map, pathPointer);
@@ -92,11 +93,12 @@ public class PathFinder {
             }
         }
 
-        pathPointer.put(current, new Pair<>(nextX, nextY));
+        visited[x][y] = false;
 
         if (shortestDist == Integer.MAX_VALUE) {
             return shortestDist;
         } else {
+            pathPointer.put(current, new Pair<>(nextX, nextY));
             return shortestDist + 1;
         }
     }
