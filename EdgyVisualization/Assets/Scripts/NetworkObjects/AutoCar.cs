@@ -5,7 +5,6 @@ using System.Threading;
 using UnityEngine;
 
 public class AutoCar : EdgeClient {
-
     // the point of the end of one specific path
     private Vector3 destination;
     // the current next goint point
@@ -19,15 +18,17 @@ public class AutoCar : EdgeClient {
     private Mutex mutex;
     private Queue<Vector3> movementQueue;
 
+    private TextMesh text;
+
     void Start () {
         SetupConnection();
-
         mutex = new Mutex();
         movementQueue = new Queue<Vector3>();
+        text = transform.GetChild(1).GetComponent<TextMesh>();
 
+        destination = transform.position;
         speed = UnityEngine.Random.Range(1f, 3f);
         coolDown = UnityEngine.Random.Range(1f, 5f);
-
         tick = coolDown;
     }
 
@@ -53,19 +54,16 @@ public class AutoCar : EdgeClient {
         }
         mutex.ReleaseMutex();
 
-        /*
-        if(Input.GetKeyDown(KeyCode.F) && !isWalking)
-        {
-            RequestForPath(new Vector3(0, 3, 0));
-        }*/
-
         if (tick < 0 && !isWalking)
         {
             RequestForPath(MapUploader.GetRandomPointOnMap());
             tick = coolDown;
         }
+
+        text.text = "(" + destination.x + "," + destination.y + ")";
     }
 
+    // send a remote request to the server
     private void RequestForPath(Vector3 newTargetPosition)
     {
         Debug.Log("Request a path to " + newTargetPosition.x + " " + newTargetPosition.y);
@@ -76,6 +74,7 @@ public class AutoCar : EdgeClient {
         SendMessage(newRequest);
     }
 
+    // when it receieves a response, this function would be called
     protected override void ProcessReponse(string commandCode, string reponse)
     {
         if (commandCode.Equals(CommandList.GetCommandCode(Command.FIND_PATH)))
@@ -101,9 +100,9 @@ public class AutoCar : EdgeClient {
                 int x = int.Parse(elements[firstIndex]);
                 int y = int.Parse(elements[secondIndex]);
 
-                movementQueue.Enqueue(new Vector3(x, y, 0));
+                destination = new Vector3(x, y, 0);
+                movementQueue.Enqueue(destination);
             }        
-
             mutex.ReleaseMutex();
         }
     }

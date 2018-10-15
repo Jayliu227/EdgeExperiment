@@ -9,6 +9,8 @@ public class MapUploader : EdgeClient {
     private static MapData map;
     private List<List<GameObject>> mapObjects;
 
+    const int NUM_OF_CARS = 5;
+
     void Start ()
     {
         mapObjects = new List<List<GameObject>>();
@@ -20,14 +22,7 @@ public class MapUploader : EdgeClient {
         SendMessage(CommandList.GetCommandCode(Command.UPLOAD_MAP));
         SendMessage(map.Stringify());
 
-        // generate a car instance
-        float carX = 1;
-        float carY = 0;
-        Vector3 pos = new Vector3(carX, carY, 0);
-        GameObject car1 = Instantiate(carInstance, pos, Quaternion.identity);
-        car1.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.cyan;
-        GameObject car2 = Instantiate(carInstance, pos, Quaternion.identity);
-        car2.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Color.magenta;
+        SpawnCars();
     }
 
     void Update()
@@ -105,13 +100,32 @@ public class MapUploader : EdgeClient {
         }
     }
 
+    private void SpawnCars()
+    {
+        for (int i = 0; i < NUM_OF_CARS; i++)
+        {
+            GameObject car = Instantiate(carInstance, GetRandomPointOnMap(), Quaternion.identity);
+            car.transform.GetChild(0).GetComponent<SpriteRenderer>().color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+        }
+    }
+
     public static Vector3 GetRandomPointOnMap()
     {
         int width = map.GetWidth();
         int height = map.GetHeight();
 
-        int randomX = UnityEngine.Random.Range(0, width);
-        int randomY = UnityEngine.Random.Range(0, height);
+        int randomX;
+        int randomY;
+        while (true)
+        {
+            randomX = UnityEngine.Random.Range(0, width);
+            randomY = UnityEngine.Random.Range(0, height);
+
+            if (map.GetValue(randomX, randomY) == 0)
+            {
+                break;
+            }
+        }
 
         return new Vector3(randomX, randomY, 0);
     }

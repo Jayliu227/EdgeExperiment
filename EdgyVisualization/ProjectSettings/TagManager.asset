@@ -38,9 +38,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: MapTile
+    uniqueID: 1254823315
+    locked: 0
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: CarGraphics
-    uniqueID: 2864477339
     locked: 0
