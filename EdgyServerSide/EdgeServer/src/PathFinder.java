@@ -47,6 +47,7 @@ public class PathFinder {
         }
 
         if (x == destX && y == destY) {
+            visited[x][y] = false;
             return 0;
         }
 
