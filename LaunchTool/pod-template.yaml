@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: edge-server0
+  labels:
+    app: edge
+spec:
+  containers:
+  - name: edge-container
+    image: edge-image:v1
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: edge-port
+      containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-service
+  labels:
+    app: edge
+spec:
+  type: NodePort
+  selector:
+    app: edge
+  ports:
+  - name: edge-service-port
+    protocol: TCP
+    # port makes this service visible to other services in k8 cluster
+    port: 8000
+    # target port is the port on the pod in this service (matches container ports)
+    targetPort: 8000
+    # node port is usually not specified by user, accessible from external apps
