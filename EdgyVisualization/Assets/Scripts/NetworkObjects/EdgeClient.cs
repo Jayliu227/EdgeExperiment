@@ -19,10 +19,6 @@ public abstract class EdgeClient : MonoBehaviour {
     protected void OnDisable()
     {
         RemoveConnection();
-        if (ListenThread != null)
-        {
-            ListenThread.Abort();
-        }
     }
 
     protected void ListenHanlder()
@@ -62,6 +58,7 @@ public abstract class EdgeClient : MonoBehaviour {
         {
             SendMessage("quit");
             clientConnection.Close();
+            ListenThread.Abort();
         }
     }
 
