@@ -1,4 +1,5 @@
-import javafx.util.Pair;
+package utils;
+
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
@@ -10,10 +11,10 @@ public class PathFinder {
     public PathFinder() {
     }
 
-    public List<Pair<Integer, Integer>> DFSPathFind(Pair<Integer, Integer> start, Pair<Integer, Integer> end, MapData map) {
-        List<Pair<Integer, Integer>> result = new ArrayList<>();
+    public List<Point<Integer>> DFSPathFind(Point<Integer> start, Point<Integer> end, MapData map) {
+        List<Point<Integer>> result = new ArrayList<>();
 
-        Map<Pair<Integer, Integer>, Pair<Integer, Integer>> pathPointer = new HashMap<>();
+        Map<Point<Integer>, Point<Integer>> pathPointer = new HashMap<>();
         boolean[][] visited = new boolean[map.getWidth()][map.getHeight()];
         for (int i = 0; i < map.getWidth(); i++) {
             for (int j = 0; j < map.getHeight(); j++) {
@@ -24,8 +25,8 @@ public class PathFinder {
         int steps = DFSPathFindHelper(start, end, visited, map, pathPointer);
 
         if (steps != Integer.MAX_VALUE) {
-            Pair<Integer, Integer> current = start;
-            while (!current.equals(end)) {
+            Point<Integer> current = start;
+            while (!current.isSame(end)) {
                 current = pathPointer.get(current);
                 result.add(current);
             }
@@ -34,11 +35,11 @@ public class PathFinder {
         return result;
     }
 
-    private int DFSPathFindHelper(Pair<Integer, Integer> current, Pair<Integer, Integer> end, boolean[][] visited, MapData map, Map<Pair<Integer, Integer>, Pair<Integer, Integer>> pathPointer) {
-        int x = current.getKey();
-        int y = current.getValue();
-        int destX = end.getKey();
-        int destY = end.getValue();
+    private int DFSPathFindHelper(Point<Integer> current, Point<Integer> end, boolean[][] visited, MapData map, Map<Point<Integer>, Point<Integer>> pathPointer) {
+        int x = current.getX();
+        int y = current.getY();
+        int destX = end.getX();
+        int destY = end.getY();
 
         visited[x][y] = true;
 
@@ -59,7 +60,7 @@ public class PathFinder {
         int nextY = -1;
 
         if (x + 1 < width && !visited[x + 1][y]) {
-            int steps = DFSPathFindHelper(new Pair<>(x + 1, y), end, visited, map, pathPointer);
+            int steps = DFSPathFindHelper(new Point<>(x + 1, y), end, visited, map, pathPointer);
             if (steps < shortestDist) {
                 shortestDist = steps;
                 nextX = x + 1;
@@ -68,7 +69,7 @@ public class PathFinder {
         }
 
         if (x - 1 >= 0 && !visited[x - 1][y]) {
-            int steps = DFSPathFindHelper(new Pair<>(x - 1, y), end, visited, map, pathPointer);
+            int steps = DFSPathFindHelper(new Point<>(x - 1, y), end, visited, map, pathPointer);
             if (steps < shortestDist) {
                 shortestDist = steps;
                 nextX = x - 1;
@@ -77,7 +78,7 @@ public class PathFinder {
         }
 
         if (y + 1 < height && !visited[x][y + 1]) {
-            int steps = DFSPathFindHelper(new Pair<>(x, y + 1), end, visited, map, pathPointer);
+            int steps = DFSPathFindHelper(new Point<>(x, y + 1), end, visited, map, pathPointer);
             if (steps < shortestDist) {
                 shortestDist = steps;
                 nextX = x;
@@ -86,7 +87,7 @@ public class PathFinder {
         }
 
         if (y - 1 >= 0 && !visited[x][y - 1]) {
-            int steps = DFSPathFindHelper(new Pair<>(x, y - 1), end, visited, map, pathPointer);
+            int steps = DFSPathFindHelper(new Point<>(x, y - 1), end, visited, map, pathPointer);
             if (steps < shortestDist) {
                 shortestDist = steps;
                 nextX = x;
@@ -99,16 +100,16 @@ public class PathFinder {
         if (shortestDist == Integer.MAX_VALUE) {
             return shortestDist;
         } else {
-            pathPointer.put(current, new Pair<>(nextX, nextY));
+            pathPointer.put(current, new Point<>(nextX, nextY));
             return shortestDist + 1;
         }
     }
 
-    public List<Pair<Integer, Integer>> AStarPathFind(Pair<Integer, Integer> start, Pair<Integer, Integer> end, MapData map) {
+    public List<Point<Integer>> AStarPathFind(Point<Integer> start, Point<Integer> end, MapData map) {
         throw new NotImplementedException();
     }
 
-    public List<Pair<Integer, Integer>> DijkstraPathFind(Pair<Integer, Integer> start, Pair<Integer, Integer> end, MapData map) {
+    public List<Point<Integer>> DijkstraPathFind(Point<Integer> start, Point< Integer> end, MapData map) {
 
         throw new NotImplementedException();
     }

@@ -40,12 +40,22 @@ def shutdown_pod(v1, name, namespace):
 		grace_period_seconds=0, \
 		propagation_policy='Foreground')
 
+def shutdown_service(v1, name, namespace):
+	response = v1.delete_namespaced_service(name, \
+		namespace,\
+		client.V1DeleteOptions(), \
+		grace_period_seconds=0, \
+		propagation_policy='Foreground')
+
 def shutdown_pods(v1, pods):
 	for pod in pods:
 		try:
 			shutdown_pod(v1, pod.metadata.name, pod.metadata.namespace)
 		except:
 			print('Error in killing %s %s'%(pod, e), out=sys.stderr)
+
+def get_service(v1, service):
+	return v1.list_service_for_all_namespaces(watch=False, field_selector='metadata.name=%s'%service) 
 
 def show(args):
 	v1 = init()
@@ -57,6 +67,10 @@ def clean(args):
 	v1 = init()
 	all_pods = find_pods(v1)
 	shutdown_pods(v1, all_pods)
+
+	all_services = get_service(v1, 'edge-service')
+	for svc in all_services.items:
+		shutdown_service(v1, svc.metadata.name, svc.metadata.namespace)
 
 def boot(args):
 	v1 = init()
@@ -106,13 +120,23 @@ def log(args):
 	else:
 		print('No such pod existing')
 
+def create_service(args):
+	v1 = init()
+	with open(os.path.join(sys.path[0], 'pod-template.yaml')) as f:
+		specs = list(yaml.load_all(f))
+		svc_spec = specs[1]
+		try:
+			response = v1.create_namespaced_service('default', svc_spec)
+		except:
+			print('Error in creating a service')
+
 def main():
 	parser = argparse.ArgumentParser(prog=sys.argv[0])
 	subparsers = parser.add_subparsers(help="sub-command help", dest='command')
 	subparsers.required = True
 	
 	list_parser = subparsers.add_parser("list")
-	list_parser.set_defaults(func = show)
+	list_parser.set_defaults(func=show)
 
 	clean_parser = subparsers.add_parser("clean")
 	clean_parser.set_defaults(func=clean)
@@ -130,10 +154,12 @@ def main():
 	launch_parser.set_defaults(func=launch)
 
 	log_parser = subparsers.add_parser("log")
-	log_parser.add_argument('which', type=int, help='Which edge should be logged')
+	log_parser.add_argument('which', type=int, help='Which edge\'s description should be logged')
 	log_parser.set_defaults(func=log)
 
 	# TODO: create services
+	svc_parser = subparsers.add_parser("createsvc")
+	svc_parser.set_defaults(func=create_service)
 
 	args = parser.parse_args()
 	args.func(args)

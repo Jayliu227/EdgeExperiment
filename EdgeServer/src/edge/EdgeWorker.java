@@ -1,4 +1,8 @@
-import javafx.util.Pair;
+package edge;
+
+import utils.CommandList;
+import utils.PathFinder;
+import utils.Point;
 
 import java.io.*;
 import java.net.Socket;
@@ -101,7 +105,7 @@ public class EdgeWorker implements Runnable {
             int dx = Integer.parseInt(elements[2]);
             int dy = Integer.parseInt(elements[3]);
 
-            List<Pair<Integer, Integer>> path = finder.DFSPathFind(new Pair<>(sx, sy), new Pair<>(dx, dy), edgeServer.GetMap());
+            List<Point<Integer>> path = finder.DFSPathFind(new Point<>(sx, sy), new Point<>(dx, dy), edgeServer.GetMap());
 
             if (path.size() == 0) {
                 SendMessageBack(CommandList.Command.NULL, "Can't find such path.");
@@ -111,8 +115,8 @@ public class EdgeWorker implements Runnable {
             String response = "";
             response += path.size() + " ";
 
-            for (Pair<Integer, Integer> step : path) {
-                response += step.getKey() + " " + step.getValue() + " ";
+            for (Point<Integer> step : path) {
+                response += step.getX() + " " + step.getY() + " ";
             }
 
             System.out.println("Found path from (" + sx + "," + sy + ") - > (" + dx + "," + dy + ")");
@@ -133,7 +137,6 @@ public class EdgeWorker implements Runnable {
         } else {
             response = "Failed to upload mao information.";
         }
-
         SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
     }
 
