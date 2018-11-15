@@ -9,6 +9,7 @@ public class CommandList {
         ECHO("100"),
         UPLOAD_MAP("101"),
         UPDATE_MAP("102"),
+        CHECK_MAP("103"),
         FIND_PATH("105"),
 
         PRINT_EDGE("201"),

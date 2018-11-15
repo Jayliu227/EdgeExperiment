@@ -7,16 +7,26 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class EdgeServer {
+    // config of edge server
     private final int port;
     private List<Socket> connectedClientSockets;
 
-    private MapData mapData = new MapData();
+    // public data
+    private MapData mapData;
 
+    // sync primitive
+    private ReadWriteLock mapDataLock;
+
+    // constructor
     public EdgeServer(int port) {
         this.port = port;
         this.connectedClientSockets = new ArrayList<>();
+        this.mapData = new MapData();
+        this.mapDataLock = new ReentrantReadWriteLock();
     }
 
     public void Start() {
@@ -44,4 +54,6 @@ public class EdgeServer {
     public MapData GetMap() {
         return mapData;
     }
+
+    public ReadWriteLock GetLock() { return mapDataLock; }
 }

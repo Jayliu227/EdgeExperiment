@@ -5,7 +5,9 @@ import utils.PathFinder;
 import utils.Point;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 public class EdgeWorker implements Runnable {
@@ -60,6 +62,7 @@ public class EdgeWorker implements Runnable {
          *           100 - Echo
          *           101 - Upload Map
          *           102 - Update Map
+         *           103 - Check Map
          *           105 - Find Path
          *       Debug Command:
          *           201 - Print Edge Info
@@ -90,9 +93,33 @@ public class EdgeWorker implements Runnable {
         String coordinates = this.reader.readLine();
 
         // check if there is a valid map
+        edgeServer.GetLock().readLock().lock();
         if (!edgeServer.GetMap().getIsValid()) {
             SendMessageBack(CommandList.Command.NULL, "There is no valid map.");
+            edgeServer.GetLock().readLock().unlock();
             return;
+        }
+        edgeServer.GetLock().readLock().unlock();
+
+        // if it is a valid map, we need to sync with the backend
+        String reply = SendAndReceieveFromBackend(CommandList.Command.CHECK_MAP, edgeServer.GetMap().getBuildString());
+        // if the reply is not null, then it is not yet sync, we need to halt the execution
+        if (reply != null && reply.equals("timeout")) {
+            SendMessageBack(CommandList.Command.NULL, "Timeout uploading map to server");
+            return;
+        }
+
+        if (reply != null && reply.equals("refuse")) {
+            SendMessageBack(CommandList.Command.NULL, "Refuse connection from backend");
+            return;
+        }
+
+        if (reply != null) {
+            edgeServer.GetLock().writeLock().lock();
+
+            edgeServer.GetMap().BuildMap(reply);
+
+            edgeServer.GetLock().writeLock().unlock();
         }
 
         String[] elements = coordinates.split(" ");
@@ -128,16 +155,25 @@ public class EdgeWorker implements Runnable {
     private void UploadMapHandler() throws IOException {
         String builderString = this.reader.readLine();
 
+        edgeServer.GetLock().readLock().lock();
         edgeServer.GetMap().BuildMap(builderString);
 
         String response;
         if (edgeServer.GetMap().getIsValid()) {
             response = "Successfully uploaded map information.";
-            edgeServer.GetMap().PrintMap();
+            // edgeServer.GetMap().PrintMap();
         } else {
             response = "Failed to upload mao information.";
         }
-        SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
+        edgeServer.GetLock().readLock().unlock();
+
+        // after uploading the map, we want to also upload the map to the backend
+        String receivedMessage = SendAndReceieveFromBackend(CommandList.Command.UPLOAD_MAP, builderString);
+        if (receivedMessage != null) {
+            SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
+        } else {
+            SendMessageBack(CommandList.Command.NULL, "Unable to upload map to backend...");
+        }
     }
 
     private void EchoHandler() throws IOException {
@@ -150,7 +186,7 @@ public class EdgeWorker implements Runnable {
 
     }
 
-    private void SendMessageBack (CommandList.Command command, String msg) {
+    private void SendMessageBack(CommandList.Command command, String msg) {
         if (this.writer == null) {
             System.out.println("Writer is not ready.");
             return;
@@ -163,12 +199,75 @@ public class EdgeWorker implements Runnable {
         this.writer.flush();
     }
 
+    private String SendAndReceieveFromBackend(CommandList.Command command, String msg) {
+        // return null if there is an error
+        Socket socket = new Socket();
+        int timeout = 3 * 1000;
+        InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
+
+        try {
+            socket.connect(backendAddr, timeout);
+
+            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            // send both the command and potential msg
+            writer.println(CommandList.GetCommandCode(command));
+            if (msg != null) {
+                writer.println(msg);
+            }
+            writer.flush();
+
+            int responseCommand = Integer.parseInt(reader.readLine());
+            if (responseCommand != 999) {
+                String response = reader.readLine();
+                return response;
+            }
+
+        } catch (SocketTimeoutException e) {
+            System.out.println("Timeout connecting backend");
+            return "timeout";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "refuse";
+        }
+
+        return null;
+    }
+
     private void CleanUp() {
-        edgeServer.GetConnectedClientSockets().remove(edgeServer);
+        edgeServer.GetConnectedClientSockets().remove(clientSocket);
         try {
             clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean TestBackend() {
+        Socket socket = new Socket();
+        int timeout = 3 * 1000;
+        InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
+        boolean successful = false;
+        try {
+            socket.connect(backendAddr, timeout);
+
+            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            writer.println("0");
+            writer.flush();
+            String commandCode = reader.readLine();
+            String message = reader.readLine();
+            System.out.println(message);
+
+            successful = true;
+        } catch (SocketTimeoutException e) {
+            System.out.println("Timeout connecting backend");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return successful;
     }
 }
