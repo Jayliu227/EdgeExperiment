@@ -2,25 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="81496187-aa03-42d6-a090-e9d33b5ba644" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/EdgeServer/backend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/EdgeServer/edge/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/backend/BackendWorker.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/backend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/edge/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EdgeServer/backend/BackendServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EdgeServer/backend/BackendServer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EdgeServer/edge/EdgeServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EdgeServer/edge/EdgeServer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/EdgeServer/edge/EdgeWorker.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EdgeServer/edge/EdgeWorker.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EdgeServer/utils/CommandList$Command.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EdgeServer/utils/CommandList$Command.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EdgeServer/utils/CommandList.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EdgeServer/utils/CommandList.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EdgeServer/utils/MapData.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EdgeServer/utils/MapData.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/backend/BackendServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/backend/BackendServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/edge/EdgeServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edge/EdgeServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/backend/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/edge/Dockerfile" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/edge/EdgeWorker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/edge/EdgeWorker.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/CommandList.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/CommandList.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/MapData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/MapData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../LaunchTool/launch.py" beforeDir="false" afterPath="$PROJECT_DIR$/../LaunchTool/launch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../LaunchTool/pod-template.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../LaunchTool/pod-template.yaml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -33,7 +21,7 @@
     <session id="-385011875">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="11" />
+          <entry key="project.closed" value="12" />
           <entry key="project.open.time.0" value="3" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.4" value="5" />
@@ -46,14 +34,14 @@
         <counts>
           <entry key="Dockerfile" value="3" />
           <entry key="iml" value="2" />
-          <entry key="java" value="22" />
+          <entry key="java" value="23" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Dockerfile" value="2" />
           <entry key="IDEA_MODULE" value="2" />
-          <entry key="JAVA" value="22" />
+          <entry key="JAVA" value="23" />
           <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
@@ -61,13 +49,13 @@
         <counts>
           <entry key="Dockerfile" value="21" />
           <entry key="dummy" value="5" />
-          <entry key="java" value="15763" />
+          <entry key="java" value="15817" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Dockerfile" value="21" />
-          <entry key="JAVA" value="15763" />
+          <entry key="JAVA" value="15817" />
           <entry key="PLAIN_TEXT" value="5" />
         </counts>
       </usages-collector>
@@ -87,11 +75,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/edge/EdgeWorker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="765">
-              <caret line="176" column="4" selection-start-line="176" selection-start-column="4" selection-end-line="176" selection-end-column="4" />
+            <state relative-caret-position="496">
+              <caret line="211" column="68" selection-start-line="211" selection-start-column="68" selection-end-line="211" selection-end-column="68" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -99,32 +87,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/backend/BackendWorker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
+            <state relative-caret-position="474">
               <caret line="80" column="8" selection-start-line="80" selection-start-column="8" selection-end-line="80" selection-end-column="8" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/net/AbstractPlainSocketImpl.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="155">
-              <caret line="349" selection-start-line="349" selection-end-line="349" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/utils/CommandList.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="16" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -161,8 +131,8 @@
         <option value="$PROJECT_DIR$/src/utils/MapData.java" />
         <option value="$PROJECT_DIR$/src/utils/CommandList.java" />
         <option value="$PROJECT_DIR$/src/edge/EdgeServer.java" />
-        <option value="$PROJECT_DIR$/src/edge/EdgeWorker.java" />
         <option value="$PROJECT_DIR$/src/backend/BackendWorker.java" />
+        <option value="$PROJECT_DIR$/src/edge/EdgeWorker.java" />
       </list>
     </option>
   </component>
@@ -298,6 +268,24 @@
           <expand>
             <path>
               <item name="EdgeServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="EdgeServer" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="EdgeServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="EdgeServer" type="462c0819:PsiDirectoryNode" />
+              <item name="out" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="EdgeServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="EdgeServer" type="462c0819:PsiDirectoryNode" />
+              <item name="out" type="462c0819:PsiDirectoryNode" />
+              <item name="production" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="EdgeServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="EdgeServer" type="462c0819:PsiDirectoryNode" />
+              <item name="out" type="462c0819:PsiDirectoryNode" />
+              <item name="production" type="462c0819:PsiDirectoryNode" />
               <item name="EdgeServer" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -442,7 +430,7 @@
       <workItem from="1541654819861" duration="106000" />
       <workItem from="1541715993938" duration="13000" />
       <workItem from="1541993178555" duration="1553000" />
-      <workItem from="1542242495979" duration="13181000" />
+      <workItem from="1542242495979" duration="14270000" />
     </task>
     <servers />
   </component>
@@ -452,18 +440,19 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16391000" />
+    <option name="totallyTimeSpent" value="17480000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20243205" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20243205" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.40963855" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.40963855" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -617,6 +606,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/net/AbstractPlainSocketImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="155">
+          <caret line="349" selection-start-line="349" selection-end-line="349" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/backend/BackendWorker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="474">
+          <caret line="80" column="8" selection-start-line="80" selection-start-column="8" selection-end-line="80" selection-end-column="8" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/edge/EdgeServer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
@@ -627,27 +633,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/net/AbstractPlainSocketImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
-          <caret line="349" selection-start-line="349" selection-end-line="349" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/edge/EdgeWorker.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="765">
-          <caret line="176" column="4" selection-start-line="176" selection-start-column="4" selection-end-line="176" selection-end-column="4" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/backend/BackendWorker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="80" column="8" selection-start-line="80" selection-start-column="8" selection-end-line="80" selection-end-column="8" />
+        <state relative-caret-position="496">
+          <caret line="211" column="68" selection-start-line="211" selection-start-column="68" selection-end-line="211" selection-end-column="68" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

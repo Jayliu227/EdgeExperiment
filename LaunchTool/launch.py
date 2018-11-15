@@ -18,7 +18,8 @@ def find_pods(v1):
 	def pod_filter(p):
 		return p.metadata.namespace == 'default' and \
 				len(p.spec.containers) == 1 and \
-				p.spec.containers[0].image.startswith('edge-image')
+				p.spec.containers[0].image.startswith('edge-image') or \
+				p.spec.containers[0].image.startswith('backend-image')
 	pods_we_own = filter(pod_filter, all_pods.items)
 	return pods_we_own
 
@@ -71,16 +72,23 @@ def clean(args):
 	all_services = get_service(v1, 'edge-service')
 	for svc in all_services.items:
 		shutdown_service(v1, svc.metadata.name, svc.metadata.namespace)
+	all_services = get_service(v1, 'backend-service')
+	for svc in all_services.items:
+		shutdown_service(v1, svc.metadata.name, svc.metadata.namespace)
 
 def boot(args):
 	v1 = init()
 	with open(os.path.join(sys.path[0], 'pod-template.yaml')) as f:
 		specs = list(yaml.load_all(f))
-		pod_spec = specs[0]
+		edge_pod_spec = specs[0]
+		backend_pod_spec = specs[2]
 		num_of_pods = args.num
 		edge_servers = ['edge-server%d'%i for i in range(num_of_pods)]
+		print('start to build edge servers.')
 		for edge_server in edge_servers:
-			boot_pod(v1, pod_spec, edge_server)
+			boot_pod(v1, edge_pod_spec, edge_server)
+		print('start to build backend server')
+		boot_pod(v1, backend_pod_spec, 'backend-server')
 
 def kill(args):
 	v1 = init()
@@ -107,26 +115,28 @@ def launch(args):
 
 def log(args):
 	v1 = init()
-	all_pods = find_pods(v1)
-	pod_name = 'edge-server%d'%args.which
-	all_pods = list(filter(lambda i : i.metadata.name == pod_name, all_pods))
+	all_pods = list(find_pods(v1))
+
 	if len(all_pods) != 0:
 		for pod in all_pods:
+			print('pod name -> %s:'%pod.metadata.name)
 			try:
 				response = v1.read_namespaced_pod_log(pod.metadata.name, pod.metadata.namespace, pretty=True)
 				print(response)
 			except:
 				print('Error in reading pod log from server')
 	else:
-		print('No such pod existing')
+		print('No pods exist')
 
 def create_service(args):
 	v1 = init()
 	with open(os.path.join(sys.path[0], 'pod-template.yaml')) as f:
 		specs = list(yaml.load_all(f))
-		svc_spec = specs[1]
+		edge_svc_spec = specs[1]
+		backend_svc_spec = specs[3]
 		try:
-			response = v1.create_namespaced_service('default', svc_spec)
+			response = v1.create_namespaced_service('default', edge_svc_spec)
+			response = v1.create_namespaced_service('default', backend_svc_spec)
 		except:
 			print('Error in creating a service')
 
@@ -153,8 +163,7 @@ def main():
 	launch_parser.add_argument('which', type=int, help='Which edge should be launched')
 	launch_parser.set_defaults(func=launch)
 
-	log_parser = subparsers.add_parser("log")
-	log_parser.add_argument('which', type=int, help='Which edge\'s description should be logged')
+	log_parser = subparsers.add_parser("logall")
 	log_parser.set_defaults(func=log)
 
 	# TODO: create services

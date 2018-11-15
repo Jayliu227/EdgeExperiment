@@ -203,7 +203,8 @@ public class EdgeWorker implements Runnable {
         // return null if there is an error
         Socket socket = new Socket();
         int timeout = 3 * 1000;
-        InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
+        InetSocketAddress backendAddr = new InetSocketAddress("backend-service", 8001);
+        // InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
 
         try {
             socket.connect(backendAddr, timeout);
