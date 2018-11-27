@@ -1,6 +1,7 @@
 package backend;
 
 import utils.CommandList;
+import utils.Communicator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +15,8 @@ public class BackendWorker implements Runnable {
 
     private BufferedReader reader;
     private PrintWriter writer;
+
+    private Communicator communicator;
 
     public BackendWorker(Socket clientSocket, BackendServer backendServer) {
         this.clientSocket = clientSocket;
@@ -31,6 +34,8 @@ public class BackendWorker implements Runnable {
             this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.writer = new PrintWriter(clientSocket.getOutputStream());
 
+            this.communicator = new Communicator(writer);
+
             String line = reader.readLine();
             // filter all non numeric value
             line = line.replaceAll("[^0-9]", "9");
@@ -39,7 +44,7 @@ public class BackendWorker implements Runnable {
                 int commandCode = Integer.parseInt(line);
                 Execute(commandCode);
             } else {
-                SendMessageBack(CommandList.Command.NULL, "Command Input incorrect...");
+                communicator.SendMessageBack(CommandList.Command.NULL, "Command Input incorrect...");
             }
 
             System.out.println("Disconnected from client " + clientSocket.getInetAddress());
@@ -67,7 +72,7 @@ public class BackendWorker implements Runnable {
          * */
         switch (commandCode) {
             case 111:
-                SendMessageBack(CommandList.Command.TEST, "Message from backend server...");
+                communicator.SendMessageBack(CommandList.Command.TEST, "Message from backend server...");
                 break;
             case 101:
                 UploadMapHandler();
@@ -77,7 +82,7 @@ public class BackendWorker implements Runnable {
             case 103:
                 CheckMapHandler();
             default:
-                SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
+                communicator.SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
         }
     }
 
@@ -92,10 +97,10 @@ public class BackendWorker implements Runnable {
         if (backendServer.GetMap().getIsValid()) {
             response = "Successfully uploaded map information.";
             backendServer.GetMap().PrintMap();
-            SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
+            communicator.SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
         } else {
             response = "Failed to upload mao information.";
-            SendMessageBack(CommandList.Command.NULL, "Unable to successfully upload map...");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to successfully upload map...");
         }
     }
 
@@ -112,26 +117,13 @@ public class BackendWorker implements Runnable {
         String currentBuildString = backendServer.GetMap().getBuildString();
         if (currentBuildString.equals(checkAgainstString)) {
             System.out.println("Check map succeeded...");
-            SendMessageBack(CommandList.Command.NULL, "Check succeeded...");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Check succeeded...");
         } else {
             System.out.println("Check map failed, send most recent to edge...");
-            SendMessageBack(CommandList.Command.CHECK_MAP, currentBuildString);
+            communicator.SendMessageBack(CommandList.Command.CHECK_MAP, currentBuildString);
         }
 
         backendServer.GetLock().readLock().unlock();
-    }
-
-    private void SendMessageBack(CommandList.Command command, String msg) {
-        if (this.writer == null) {
-            System.out.println("Writer is not ready.");
-            return;
-        }
-
-        // First send the what command this response is for.
-        this.writer.println(CommandList.GetCommandCode(command));
-        // Then send what this response is.
-        this.writer.println(msg);
-        this.writer.flush();
     }
 
     private void CleanUp() {

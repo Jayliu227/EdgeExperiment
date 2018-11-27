@@ -1,6 +1,7 @@
 package edge;
 
 import utils.CommandList;
+import utils.Communicator;
 import utils.PathFinder;
 import utils.Point;
 
@@ -17,6 +18,8 @@ public class EdgeWorker implements Runnable {
     private BufferedReader reader;
     private PrintWriter writer;
 
+    private Communicator communicator;
+
     public EdgeWorker(Socket clientSocket, EdgeServer edgeServer) {
         this.edgeServer = edgeServer;
         this.clientSocket = clientSocket;
@@ -31,6 +34,8 @@ public class EdgeWorker implements Runnable {
 
             this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.writer = new PrintWriter(clientSocket.getOutputStream());
+
+            this.communicator = new Communicator(writer);
 
             String line = reader.readLine();
             while (!line.equalsIgnoreCase("quit")) {
@@ -72,7 +77,7 @@ public class EdgeWorker implements Runnable {
          * */
         switch (commandCode) {
             case 0:
-                SendMessageBack(CommandList.Command.TEST, "Response from edge server...");
+                communicator.SendMessageBack(CommandList.Command.TEST, "Response from edge server...");
                 break;
             case 100:
                 EchoHandler();
@@ -84,7 +89,7 @@ public class EdgeWorker implements Runnable {
                 PathFindingHandler();
                 break;
             default:
-                SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
+                communicator.SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
         }
     }
 
@@ -95,22 +100,22 @@ public class EdgeWorker implements Runnable {
         // check if there is a valid map
         edgeServer.GetLock().readLock().lock();
         if (!edgeServer.GetMap().getIsValid()) {
-            SendMessageBack(CommandList.Command.NULL, "There is no valid map.");
+            communicator.SendMessageBack(CommandList.Command.NULL, "There is no valid map.");
             edgeServer.GetLock().readLock().unlock();
             return;
         }
         edgeServer.GetLock().readLock().unlock();
 
         // if it is a valid map, we need to sync with the backend
-        String reply = SendAndReceieveFromBackend(CommandList.Command.CHECK_MAP, edgeServer.GetMap().getBuildString());
+        String reply = communicator.SendAndReceiveFromBackend(CommandList.Command.CHECK_MAP, edgeServer.GetMap().getBuildString());
         // if the reply is not null, then it is not yet sync, we need to halt the execution
         if (reply != null && reply.equals("timeout")) {
-            SendMessageBack(CommandList.Command.NULL, "Timeout uploading map to server");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Timeout uploading map to server");
             return;
         }
 
         if (reply != null && reply.equals("refuse")) {
-            SendMessageBack(CommandList.Command.NULL, "Refuse connection from backend");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Refuse connection from backend");
             return;
         }
 
@@ -125,7 +130,7 @@ public class EdgeWorker implements Runnable {
         String[] elements = coordinates.split(" ");
         if (elements.length != 4) {
             // if the input if invalid, we return something to represent it;
-            SendMessageBack(CommandList.Command.NULL, "Input for path finding is invalid.");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Input for path finding is invalid.");
         } else {
             int sx = Integer.parseInt(elements[0]);
             int sy = Integer.parseInt(elements[1]);
@@ -135,7 +140,7 @@ public class EdgeWorker implements Runnable {
             List<Point<Integer>> path = finder.DFSPathFind(new Point<>(sx, sy), new Point<>(dx, dy), edgeServer.GetMap());
 
             if (path.size() == 0) {
-                SendMessageBack(CommandList.Command.NULL, "Can't find such path.");
+                communicator.SendMessageBack(CommandList.Command.NULL, "Can't find such path.");
                 return;
             }
 
@@ -151,7 +156,7 @@ public class EdgeWorker implements Runnable {
 
             System.out.println("Found path from (" + sx + "," + sy + ") - > (" + dx + "," + dy + ")");
             System.out.println("Message sent back: " + response);
-            SendMessageBack(CommandList.Command.FIND_PATH, response);
+            communicator.SendMessageBack(CommandList.Command.FIND_PATH, response);
         }
     }
 
@@ -171,11 +176,11 @@ public class EdgeWorker implements Runnable {
         edgeServer.GetLock().readLock().unlock();
 
         // after uploading the map, we want to also upload the map to the backend
-        String receivedMessage = SendAndReceieveFromBackend(CommandList.Command.UPLOAD_MAP, builderString);
+        String receivedMessage = communicator.SendAndReceiveFromBackend(CommandList.Command.UPLOAD_MAP, builderString);
         if (receivedMessage != null) {
-            SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
+            communicator.SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
         } else {
-            SendMessageBack(CommandList.Command.NULL, "Unable to upload map to backend...");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to upload map to backend...");
         }
     }
 
@@ -184,59 +189,9 @@ public class EdgeWorker implements Runnable {
         msg = this.reader.readLine();
 
         if (msg != null) {
-            SendMessageBack(CommandList.Command.ECHO, "Message from client: " + msg);
+            communicator.SendMessageBack(CommandList.Command.ECHO, "Message from client: " + msg);
         }
 
-    }
-
-    private void SendMessageBack(CommandList.Command command, String msg) {
-        if (this.writer == null) {
-            System.out.println("Writer is not ready.");
-            return;
-        }
-
-        // First send the what command this response is for.
-        this.writer.println(CommandList.GetCommandCode(command));
-        // Then send what this response is.
-        this.writer.println(msg);
-        this.writer.flush();
-    }
-
-    private String SendAndReceieveFromBackend(CommandList.Command command, String msg) {
-        // return null if there is an error
-        Socket socket = new Socket();
-        int timeout = 3 * 1000;
-        InetSocketAddress backendAddr = new InetSocketAddress("backend-service", 8001);
-        // InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
-
-        try {
-            socket.connect(backendAddr, timeout);
-
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            // send both the command and potential msg
-            writer.println(CommandList.GetCommandCode(command));
-            if (msg != null) {
-                writer.println(msg);
-            }
-            writer.flush();
-
-            int responseCommand = Integer.parseInt(reader.readLine());
-            if (responseCommand != 999) {
-                String response = reader.readLine();
-                return response;
-            }
-
-        } catch (SocketTimeoutException e) {
-            System.out.println("Timeout connecting backend");
-            return "timeout";
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "refuse";
-        }
-
-        return null;
     }
 
     private void CleanUp() {
