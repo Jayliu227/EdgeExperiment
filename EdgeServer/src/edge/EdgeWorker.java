@@ -139,6 +139,9 @@ public class EdgeWorker implements Runnable {
                 return;
             }
 
+            // we remove the first one from the list
+            path.remove(0);
+
             String response = "";
             response += path.size() + " ";
 

@@ -40,6 +40,12 @@ public class EdgeServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        MainLoop();
+    }
+
+    private void MainLoop() {
+
     }
 
     public static void main(String[] args) {

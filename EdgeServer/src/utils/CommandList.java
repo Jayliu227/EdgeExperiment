@@ -11,6 +11,7 @@ public class CommandList {
         UPDATE_MAP("102"),
         CHECK_MAP("103"),
         FIND_PATH("105"),
+        COORDINATE_PATH("106"),
 
         PRINT_EDGE("201"),
         PRINT_TASK_INFO("202");
