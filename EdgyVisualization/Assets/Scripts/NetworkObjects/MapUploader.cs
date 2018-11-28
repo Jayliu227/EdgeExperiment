@@ -9,7 +9,7 @@ public class MapUploader : EdgeClient {
     private static MapData map;
     private List<List<GameObject>> mapObjects;
 
-    const int NUM_OF_CARS = 5;
+    const int NUM_OF_CARS = 2;
 
     void Start ()
     {
@@ -30,15 +30,42 @@ public class MapUploader : EdgeClient {
 
     }
 
-    protected override void ProcessReponse(string commandCode, string reponse)
+    protected override void ProcessResponse(string commandCode, string reponse)
     {
-        Debug.Log(reponse);
+        if (commandCode.Equals(CommandList.GetCommandCode(Command.NULL)))
+        {
+            Debug.Log("Upload map failed..");
+        } else
+        {
+            Debug.Log(reponse);
+        }
     }
 
     private void GenerateMap()
     {
         List<List<int>> mapData = new List<List<int>>();
 
+        /*
+        int width = 50;
+        int height = 50;
+
+        for (int i = 0; i < width; i++)
+        {
+            List<int> row = new List<int>();
+            for (int j = 0; j < height; j++)
+            {
+                int rand = UnityEngine.Random.Range(0, 1);
+                if (rand < 0.7)
+                {
+                    row.Add(0);
+                } else
+                {
+                    row.Add(1);
+                }
+            }
+            mapData.Add(row);
+        }
+        */
         var a = new List<int>() { 1, 0, 0, 0, 0 };
         var b = new List<int>() { 0, 0, 0, 1, 0 };
         var c = new List<int>() { 0, 1, 0, 0, 0 };

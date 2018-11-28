@@ -12,12 +12,14 @@ public class AutoCar : EdgeClient {
     private float speed = 1f;
     private bool isWalking = false;
     private bool isAutomatic = true;
+    private bool isSentRequest = false;
 
     private float coolDown;
     private float tick = 0;
     private Mutex mutex;
     private Queue<Vector3> movementQueue;
 
+    // Unity reference
     private TextMesh text;
 
     void Start () {
@@ -28,6 +30,10 @@ public class AutoCar : EdgeClient {
 
         destination = transform.position;
         speed = UnityEngine.Random.Range(1f, 3f);
+
+        // TEST: just make all of them have constant speed for now
+        speed = 1f;
+
         coolDown = UnityEngine.Random.Range(1f, 5f);
         tick = coolDown;
     }
@@ -54,9 +60,15 @@ public class AutoCar : EdgeClient {
         }
         mutex.ReleaseMutex();
 
-        if (tick < 0 && !isWalking)
+        if (tick < 0 && !isWalking && !isSentRequest)
         {
-            RequestForPath(MapUploader.GetRandomPointOnMap());
+            Vector3 newPoint = MapUploader.GetRandomPointOnMap();
+            while (newPoint == transform.position)
+            {
+                newPoint = MapUploader.GetRandomPointOnMap();
+            }
+            RequestForPath(newPoint);
+            isSentRequest = true;
             tick = coolDown;
         }
 
@@ -75,10 +87,17 @@ public class AutoCar : EdgeClient {
     }
 
     // when it receieves a response, this function would be called
-    protected override void ProcessReponse(string commandCode, string reponse)
+    protected override void ProcessResponse(string commandCode, string reponse)
     {
+        if (commandCode.Equals(CommandList.GetCommandCode(Command.NULL)))
+        {
+            isSentRequest = false;
+        }
+
         if (commandCode.Equals(CommandList.GetCommandCode(Command.FIND_PATH)))
         {
+            Debug.Log("Received path answer from server");
+
             // decode reponse
             string[] elements = reponse.Split(' ');
             int numOfSteps = int.Parse(elements[0]);
@@ -104,6 +123,8 @@ public class AutoCar : EdgeClient {
                 movementQueue.Enqueue(destination);
             }        
             mutex.ReleaseMutex();
+
+            isSentRequest = false;
         }
     }
 }

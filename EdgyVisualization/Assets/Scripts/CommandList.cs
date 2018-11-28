@@ -1,5 +1,7 @@
 ﻿public enum Command
 {
+    NULL = 999,
+
     TEST = 0,
     ECHO = 100,
     UPLOAD_MAP = 101,
