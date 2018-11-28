@@ -1,3 +1,5 @@
+package utils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,7 @@ public class MapData {
     private int height;
 
     private boolean isValid;
+    private String buildString;
 
     public MapData() {
         isValid = false;
@@ -32,6 +35,7 @@ public class MapData {
 
     public void BuildMap(String buildString) {
         isValid = true;
+        this.buildString = buildString;
         String[] elements = buildString.split(" ");
 
         // check if it contains at least width and height
@@ -86,5 +90,12 @@ public class MapData {
 
     public int getHeight() {
         return height;
+    }
+
+    public String getBuildString() { return buildString; }
+
+    @Override
+    public boolean equals(Object obj) {
+        return getBuildString().equals(((MapData)obj).getBuildString());
     }
 }
