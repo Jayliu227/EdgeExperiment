@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -30,6 +31,10 @@ public class BackendServer {
         try {
             ServerSocket backend = new ServerSocket(this.port);
             System.out.println("Backend server starts listening on port " + this.port);
+
+            // Timer timer = new Timer();
+            // timer.schedule();
+
             while (true) {
                 Socket clientSocket = backend.accept();
                 new Thread(new BackendWorker(clientSocket, this)).start();
@@ -43,6 +48,7 @@ public class BackendServer {
         BackendServer backend = new BackendServer(8001);
         backend.Start();
     }
+
 
     public List<Socket> GetConnectedClientSockets() {
         return connectedClientSockets;

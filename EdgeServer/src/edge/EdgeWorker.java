@@ -147,12 +147,7 @@ public class EdgeWorker implements Runnable {
             // we remove the first one from the list
             path.remove(0);
 
-            String response = "";
-            response += path.size() + " ";
-
-            for (Point<Integer> step : path) {
-                response += step.getX() + " " + step.getY() + " ";
-            }
+            String response = communicator.EncodePath(path);
 
             System.out.println("Found path from (" + sx + "," + sy + ") - > (" + dx + "," + dy + ")");
             System.out.println("Message sent back: " + response);

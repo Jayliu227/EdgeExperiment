@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Communicator {
@@ -36,8 +37,8 @@ public class Communicator {
         Socket socket = new Socket();
         int timeout = 3 * 1000;
 
-        InetSocketAddress backendAddr = new InetSocketAddress("backend-service", 8001);
-        // InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
+        // InetSocketAddress backendAddr = new InetSocketAddress("backend-service", 8001);
+        InetSocketAddress backendAddr = new InetSocketAddress("localhost", 8001);
 
         try {
             socket.connect(backendAddr, timeout);
@@ -70,10 +71,30 @@ public class Communicator {
     }
 
     public String EncodePath(List<Point<Integer>> path) {
-        throw new NotImplementedException();
+        String response = "";
+        response += path.size() + " ";
+
+        for (Point<Integer> step : path) {
+            response += step.getX() + " " + step.getY() + " ";
+        }
+
+        return response;
     }
 
     public List<Point<Integer>> DecodePath(String code) {
-        throw new NotImplementedException();
+        List<Point<Integer>> result = new ArrayList<>();
+
+        String[] elements = code.split(" ");
+        if (elements.length < 2) {
+            return null;
+        }
+        int length = Integer.parseInt(elements[0]);
+        for (int i = 0; i < length; i++) {
+            int x = Integer.parseInt(elements[2 * i + 1]);
+            int y = Integer.parseInt(elements[2 * i + 2]);
+            result.add(new Point<>(x, y));
+        }
+
+        return result;
     }
 }

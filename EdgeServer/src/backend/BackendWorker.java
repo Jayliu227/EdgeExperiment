@@ -77,10 +77,9 @@ public class BackendWorker implements Runnable {
             case 101:
                 UploadMapHandler();
                 break;
-            case 102:
-                UpdateMapHandler();
             case 103:
                 CheckMapHandler();
+                break;
             default:
                 communicator.SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
         }
@@ -102,10 +101,6 @@ public class BackendWorker implements Runnable {
             response = "Failed to upload mao information.";
             communicator.SendMessageBack(CommandList.Command.NULL, "Unable to successfully upload map...");
         }
-    }
-
-    private void UpdateMapHandler() {
-
     }
 
     private void CheckMapHandler() throws IOException {
