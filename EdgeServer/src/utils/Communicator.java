@@ -70,6 +70,10 @@ public class Communicator {
     }
 
     public static String EncodePath(List<Point<Integer>> path) {
+        if (path == null) {
+            return "-1";
+        }
+
         String response = "";
         response += path.size() + " ";
 

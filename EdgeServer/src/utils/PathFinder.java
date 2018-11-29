@@ -3,7 +3,6 @@ package utils;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PathFinder {
     public PathFinder() {
@@ -104,7 +103,7 @@ public class PathFinder {
         }
     }
 
-    public List<List<Point<Integer>>> CoordinatePaths(List<List<Point<Integer>>> paths, MapData map) {
+    public List<List<Point<Integer>>> CoordinatePaths(List<List<Point<Integer>>> paths) {
         // make sure each path has a start and end
         for (List<Point<Integer>> path : paths) if (path.size() < 2) return null;
 
@@ -140,6 +139,9 @@ public class PathFinder {
             // add the start to the final result
             resultPath.get(currentID).add(currentPath.get(0));
             // timestamp the start position
+            if (!pointTimes.containsKey(currentPath.get(0))) {
+                pointTimes.put(currentPath.get(0), new ArrayList<>());
+            }
             pointTimes.get(currentPath.get(0)).add(timestamp);
 
             // we loop from the first to the second to the last
@@ -148,6 +150,9 @@ public class PathFinder {
                 int next = position + 1;
                 Point<Integer> nextPoint = currentPath.get(next);
                 // we get the mex of next step
+                if (!pointTimes.containsKey(nextPoint)) {
+                    pointTimes.put(nextPoint, new ArrayList<>());
+                }
                 int mex = GetMex(pointTimes.get(nextPoint), timestamp + 1);
 
                 for (int j = timestamp + 1; j < mex; j++) {

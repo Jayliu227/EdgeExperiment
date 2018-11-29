@@ -134,7 +134,11 @@ public class BackendWorker implements Runnable {
             backendServer.outbox.replace(myTerm, currentTable);
         }
         // send message back
-        communicator.SendMessageBack(CommandList.Command.COORDINATE_PATH, path);
+        if (path.equals("-1")) {
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to find valid result");
+        } else {
+            communicator.SendMessageBack(CommandList.Command.COORDINATE_PATH, path);
+        }
         backendServer.outLock.unlock();
     }
 
