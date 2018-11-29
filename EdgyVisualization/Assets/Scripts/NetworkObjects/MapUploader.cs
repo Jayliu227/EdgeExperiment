@@ -9,7 +9,7 @@ public class MapUploader : EdgeClient {
     private static MapData map;
     private List<List<GameObject>> mapObjects;
 
-    const int NUM_OF_CARS = 2;
+    const int NUM_OF_CARS = 4;
 
     void Start ()
     {
@@ -129,10 +129,17 @@ public class MapUploader : EdgeClient {
 
     private void SpawnCars()
     {
+    	List<Vector3> usedPoints = new List<Vector3>();
         for (int i = 0; i < NUM_OF_CARS; i++)
         {
-            GameObject car = Instantiate(carInstance, GetRandomPointOnMap(), Quaternion.identity);
+        	Vector3 point = GetRandomPointOnMap();
+        	while (usedPoints.Contains(point)) {
+        		point = GetRandomPointOnMap();
+        	}
+
+            GameObject car = Instantiate(carInstance, point, Quaternion.identity);
             car.transform.GetChild(0).GetComponent<SpriteRenderer>().color = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+        	usedPoints.Add(point);
         }
     }
 
