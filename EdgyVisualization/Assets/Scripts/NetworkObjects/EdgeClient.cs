@@ -29,7 +29,7 @@ public abstract class EdgeClient : MonoBehaviour {
             string message = null;
             commandCode = ReceiveMessage();
             message = ReceiveMessage();
-            ProcessReponse(commandCode, message);
+            ProcessResponse(commandCode, message);
         }
     }
 
@@ -81,5 +81,5 @@ public abstract class EdgeClient : MonoBehaviour {
         }
     }
 
-    protected abstract void ProcessReponse(string commandCode, string reponse);
+    protected abstract void ProcessResponse(string commandCode, string reponse);
 }
