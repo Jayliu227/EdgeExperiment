@@ -1,3 +1,6 @@
+# docker minikube
+eval $(minikube docker-env)
+
 # remove any previous build
 docker rmi edge-image:v1
 docker rmi backend-image:v1
