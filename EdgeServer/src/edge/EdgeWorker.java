@@ -147,7 +147,13 @@ public class EdgeWorker implements Runnable {
             // we remove the first one from the list
             path.remove(0);
 
-            String response = communicator.EncodePath(path);
+            String response = Communicator.EncodePath(path);
+
+            // TEST
+            String fromBackend = communicator.SendAndReceiveFromBackend(CommandList.Command.COORDINATE_PATH, response);
+            if (!response.equals(fromBackend)) {
+                System.out.println("Error here: self->" + response + " theirs->" + fromBackend);
+            }
 
             System.out.println("Found path from (" + sx + "," + sy + ") - > (" + dx + "," + dy + ")");
             System.out.println("Message sent back: " + response);

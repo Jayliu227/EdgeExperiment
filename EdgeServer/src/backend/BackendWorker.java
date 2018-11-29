@@ -8,19 +8,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class BackendWorker implements Runnable {
     private final Socket clientSocket;
     private final BackendServer backendServer;
+
+    private final int id;
 
     private BufferedReader reader;
     private PrintWriter writer;
 
     private Communicator communicator;
 
-    public BackendWorker(Socket clientSocket, BackendServer backendServer) {
+    public BackendWorker(Socket clientSocket, BackendServer backendServer, int id) {
         this.clientSocket = clientSocket;
         this.backendServer = backendServer;
+        this.id = id;
 
         backendServer.GetConnectedClientSockets().add(clientSocket);
     }
@@ -80,9 +84,58 @@ public class BackendWorker implements Runnable {
             case 103:
                 CheckMapHandler();
                 break;
+            case 106:
+                CoordinateHandler();
             default:
                 communicator.SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
         }
+    }
+
+    private void CoordinateHandler() throws IOException {
+        String path = this.reader.readLine();
+
+        // inbox
+        backendServer.inLock.lock();
+        int myTerm = backendServer.currentTerm;
+        if (!backendServer.inbox.containsKey(myTerm)) {
+            backendServer.inbox.put(myTerm, new HashMap<>());
+        }
+        backendServer.inbox.get(myTerm).put(id, path);
+        backendServer.inLock.unlock();
+
+        // outbox
+        backendServer.outLock.lock();
+        while (myTerm > backendServer.releaseTerm) {
+            backendServer.releaseCond.awaitUninterruptibly();
+        }
+
+        if (!backendServer.outbox.containsKey(myTerm)) {
+            System.out.println("No result of the same term from outbox");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to find valid result");
+            backendServer.outLock.unlock();
+            return;
+        }
+
+        HashMap<Integer, String> currentTable = backendServer.outbox.get(myTerm);
+        if (!currentTable.containsKey(id)) {
+            System.out.println("Unable to find result from outbox");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to find valid result");
+            backendServer.outLock.unlock();
+            return;
+        }
+
+        path = currentTable.get(id);
+        currentTable.remove(id);
+        if (currentTable.size() == 0) {
+            backendServer.outbox.remove(myTerm);
+            backendServer.allOut = true;
+            backendServer.allOutCond.signalAll();
+        } else {
+            backendServer.outbox.replace(myTerm, currentTable);
+        }
+        // send message back
+        communicator.SendMessageBack(CommandList.Command.COORDINATE_PATH, path);
+        backendServer.outLock.unlock();
     }
 
     private void UploadMapHandler() throws IOException {
@@ -99,7 +152,7 @@ public class BackendWorker implements Runnable {
             communicator.SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
         } else {
             response = "Failed to upload mao information.";
-            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to successfully upload map...");
+            communicator.SendMessageBack(CommandList.Command.NULL, response);
         }
     }
 

@@ -1,7 +1,5 @@
 package utils;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +30,7 @@ public class Communicator {
         this.writer.flush();
     }
 
+    // this should not be called by backend, only available to edge
     public String SendAndReceiveFromBackend(CommandList.Command command, String msg) {
         // return null if there is an error
         Socket socket = new Socket();
@@ -70,7 +69,7 @@ public class Communicator {
         return null;
     }
 
-    public String EncodePath(List<Point<Integer>> path) {
+    public static String EncodePath(List<Point<Integer>> path) {
         String response = "";
         response += path.size() + " ";
 
@@ -81,7 +80,7 @@ public class Communicator {
         return response;
     }
 
-    public List<Point<Integer>> DecodePath(String code) {
+    public static List<Point<Integer>> DecodePath(String code) {
         List<Point<Integer>> result = new ArrayList<>();
 
         String[] elements = code.split(" ");
