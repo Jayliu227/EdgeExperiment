@@ -7,7 +7,8 @@ using UnityEngine;
 
 public abstract class EdgeClient : MonoBehaviour {
 
-    private string hostName = "192.168.1.99";
+    private string hostName = "localhost";
+    //private string hostName = "192.168.1.99";
     private int port = 8000;
 
     private TcpClient clientConnection;

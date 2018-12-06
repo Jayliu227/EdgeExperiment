@@ -1,23 +1,30 @@
 package backend;
 
 import utils.CommandList;
+import utils.Communicator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class BackendWorker implements Runnable {
     private final Socket clientSocket;
     private final BackendServer backendServer;
 
+    private final int id;
+
     private BufferedReader reader;
     private PrintWriter writer;
 
-    public BackendWorker(Socket clientSocket, BackendServer backendServer) {
+    private Communicator communicator;
+
+    public BackendWorker(Socket clientSocket, BackendServer backendServer, int id) {
         this.clientSocket = clientSocket;
         this.backendServer = backendServer;
+        this.id = id;
 
         backendServer.GetConnectedClientSockets().add(clientSocket);
     }
@@ -31,6 +38,8 @@ public class BackendWorker implements Runnable {
             this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.writer = new PrintWriter(clientSocket.getOutputStream());
 
+            this.communicator = new Communicator(writer);
+
             String line = reader.readLine();
             // filter all non numeric value
             line = line.replaceAll("[^0-9]", "9");
@@ -39,7 +48,7 @@ public class BackendWorker implements Runnable {
                 int commandCode = Integer.parseInt(line);
                 Execute(commandCode);
             } else {
-                SendMessageBack(CommandList.Command.NULL, "Command Input incorrect...");
+                communicator.SendMessageBack(CommandList.Command.NULL, "Command Input incorrect...");
             }
 
             System.out.println("Disconnected from client " + clientSocket.getInetAddress());
@@ -67,18 +76,70 @@ public class BackendWorker implements Runnable {
          * */
         switch (commandCode) {
             case 111:
-                SendMessageBack(CommandList.Command.TEST, "Message from backend server...");
+                communicator.SendMessageBack(CommandList.Command.TEST, "Message from backend server...");
                 break;
             case 101:
                 UploadMapHandler();
                 break;
-            case 102:
-                UpdateMapHandler();
             case 103:
                 CheckMapHandler();
+                break;
+            case 106:
+                CoordinateHandler();
             default:
-                SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
+                communicator.SendMessageBack(CommandList.Command.NULL, "Cannot recognize command...");
         }
+    }
+
+    private void CoordinateHandler() throws IOException {
+        String path = this.reader.readLine();
+
+        // inbox
+        backendServer.inLock.lock();
+        int myTerm = backendServer.currentTerm;
+        if (!backendServer.inbox.containsKey(myTerm)) {
+            backendServer.inbox.put(myTerm, new HashMap<>());
+        }
+        backendServer.inbox.get(myTerm).put(id, path);
+        backendServer.inLock.unlock();
+
+        // outbox
+        backendServer.outLock.lock();
+        while (myTerm > backendServer.releaseTerm) {
+            backendServer.releaseCond.awaitUninterruptibly();
+        }
+
+        if (!backendServer.outbox.containsKey(myTerm)) {
+            System.out.println("No result of the same term from outbox");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to find valid result");
+            backendServer.outLock.unlock();
+            return;
+        }
+
+        HashMap<Integer, String> currentTable = backendServer.outbox.get(myTerm);
+        if (!currentTable.containsKey(id)) {
+            System.out.println("Unable to find result from outbox");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to find valid result");
+            backendServer.outLock.unlock();
+            return;
+        }
+
+        path = currentTable.get(id);
+        currentTable.remove(id);
+        if (currentTable.size() == 0) {
+            backendServer.outbox.remove(myTerm);
+            backendServer.allOut = true;
+            backendServer.allOutCond.signalAll();
+        } else {
+            backendServer.outbox.replace(myTerm, currentTable);
+        }
+        // send message back
+        if (path.equals("-1")) {
+            communicator.SendMessageBack(CommandList.Command.NULL, "Unable to find valid result");
+        } else {
+            communicator.SendMessageBack(CommandList.Command.COORDINATE_PATH, path);
+        }
+        backendServer.outLock.unlock();
     }
 
     private void UploadMapHandler() throws IOException {
@@ -92,15 +153,11 @@ public class BackendWorker implements Runnable {
         if (backendServer.GetMap().getIsValid()) {
             response = "Successfully uploaded map information.";
             backendServer.GetMap().PrintMap();
-            SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
+            communicator.SendMessageBack(CommandList.Command.UPLOAD_MAP, response);
         } else {
             response = "Failed to upload mao information.";
-            SendMessageBack(CommandList.Command.NULL, "Unable to successfully upload map...");
+            communicator.SendMessageBack(CommandList.Command.NULL, response);
         }
-    }
-
-    private void UpdateMapHandler() {
-
     }
 
     private void CheckMapHandler() throws IOException {
@@ -112,26 +169,13 @@ public class BackendWorker implements Runnable {
         String currentBuildString = backendServer.GetMap().getBuildString();
         if (currentBuildString.equals(checkAgainstString)) {
             System.out.println("Check map succeeded...");
-            SendMessageBack(CommandList.Command.NULL, "Check succeeded...");
+            communicator.SendMessageBack(CommandList.Command.NULL, "Check succeeded...");
         } else {
             System.out.println("Check map failed, send most recent to edge...");
-            SendMessageBack(CommandList.Command.CHECK_MAP, currentBuildString);
+            communicator.SendMessageBack(CommandList.Command.CHECK_MAP, currentBuildString);
         }
 
         backendServer.GetLock().readLock().unlock();
-    }
-
-    private void SendMessageBack(CommandList.Command command, String msg) {
-        if (this.writer == null) {
-            System.out.println("Writer is not ready.");
-            return;
-        }
-
-        // First send the what command this response is for.
-        this.writer.println(CommandList.GetCommandCode(command));
-        // Then send what this response is.
-        this.writer.println(msg);
-        this.writer.flush();
     }
 
     private void CleanUp() {
